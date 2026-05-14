@@ -1,0 +1,194 @@
+% =====================================================================
+% Пословна интелигенција — Уџбеник
+% Главни LaTeX фајл. Компајлирати са: xelatex + biber + xelatex + xelatex
+% =====================================================================
+\documentclass[11pt,b5paper,oneside,openany]{book}
+
+% ---------- Подршка за UTF-8 / ћирилицу ----------
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[utf8]{inputenc}
+  \usepackage[T2A,T1]{fontenc}
+  \usepackage[serbianc,english]{babel}
+\else
+  \usepackage{fontspec}
+  \usepackage{polyglossia}
+  \setdefaultlanguage[script=Cyrillic]{serbian}
+  \setotherlanguage{english}
+  % Главни фонт: PT Serif (има пуни Кирил.), уз fallback ако није инсталиран
+  \IfFontExistsTF{PT Serif}{\setmainfont{PT Serif}}{%
+    \IfFontExistsTF{Charis SIL}{\setmainfont{Charis SIL}}{%
+      \IfFontExistsTF{DejaVu Serif}{\setmainfont{DejaVu Serif}}{%
+        \setmainfont{Liberation Serif}}}}
+  \IfFontExistsTF{PT Sans}{\setsansfont{PT Sans}}{%
+    \IfFontExistsTF{DejaVu Sans}{\setsansfont{DejaVu Sans}}{%
+      \setsansfont{Liberation Sans}}}
+  \IfFontExistsTF{DejaVu Sans Mono}{\setmonofont{DejaVu Sans Mono}}{%
+    \setmonofont{Liberation Mono}}
+\fi
+
+% ---------- Геометрија (B5) ----------
+\usepackage{geometry}
+\geometry{
+  paperwidth=176mm,
+  paperheight=250mm,
+  top=22mm,
+  bottom=22mm,
+  inner=22mm,
+  outer=18mm,
+  headheight=14pt
+}
+
+% ---------- Типографија ----------
+\linespread{1.15}
+\usepackage[protrusion=true,expansion=false,final]{microtype}
+\usepackage{setspace}
+% Толеранција за прелом — мање overfull боксева
+\tolerance=2000
+\emergencystretch=3em
+\hyphenpenalty=50
+\exhyphenpenalty=50
+% Спречавање удовица/сирочади
+\widowpenalty=10000
+\clubpenalty=10000
+% Justify са бољим преломом
+\sloppy
+
+% ---------- Графика и слике ----------
+\usepackage{graphicx}
+\graphicspath{{slike/}{slike/01/}{slike/02/}{slike/03/}{slike/04/}}
+\usepackage{float}
+% Постављање плутајућих фигура — јачи hint за позицију близу текста
+\usepackage{placeins}                  % \FloatBarrier
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\bottomfraction}{0.9}
+\renewcommand{\textfraction}{0.05}
+\renewcommand{\floatpagefraction}{0.85}
+% Аутоматски \FloatBarrier пред сваки \section
+\makeatletter
+\AtBeginDocument{%
+  \let\origsection\section
+  \renewcommand{\section}{\FloatBarrier\origsection}%
+}
+\makeatother
+% Подразумевана позиција за слике/табеле — преферира текући положај
+\makeatletter
+\renewcommand{\fps@figure}{!htbp}
+\renewcommand{\fps@table}{!htbp}
+\makeatother
+
+% ---------- Боје и оквири ----------
+\usepackage{xcolor}
+\usepackage[most]{tcolorbox}
+\tcbuselibrary{breakable,skins}
+
+% ---------- Листе ----------
+\usepackage{enumitem}
+
+% ---------- Табеле ----------
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{adjustbox}
+
+% ---------- Опис слика и табела ----------
+\usepackage{caption}
+\captionsetup{labelfont=bf,font=small,labelsep=period}
+
+% ---------- Код ----------
+\usepackage{listings}
+\lstdefinelanguage{json}{
+  morestring=[b]",
+  morestring=[s]{'}{'},
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morekeywords={true,false,null},
+  sensitive=false,
+}
+\definecolor{codegray}{rgb}{0.95,0.95,0.95}
+\lstset{
+  backgroundcolor=\color{codegray},
+  basicstyle=\ttfamily\footnotesize,
+  breaklines=true,
+  frame=single,
+  keepspaces=true,
+  inputencoding=utf8,
+  extendedchars=true
+}
+
+% ---------- Математика ----------
+\usepackage{amsmath,amssymb,amsthm}
+
+% ---------- Хиперлинкови ----------
+\usepackage[hidelinks]{hyperref}
+\hypersetup{
+  pdftitle={Пословна интелигенција},
+  pdfauthor={Колектив аутора},
+  pdfsubject={Уџбеник},
+  pdfkeywords={пословна интелигенција, складишта података, ОЗП, аутоматизација, AI},
+  bookmarksnumbered=true
+}
+
+% ---------- Заглавља ----------
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[LE,RO]{\thepage}
+\fancyhead[RE]{\small\textit{\leftmark}}
+\fancyhead[LO]{\small\textit{\rightmark}}
+\renewcommand{\headrulewidth}{0.3pt}
+
+% ---------- Стил наслова поглавља ----------
+\usepackage{titlesec}
+\titleformat{\chapter}[display]
+  {\normalfont\Huge\bfseries}
+  {\chaptertitlename\ \thechapter}{20pt}{\Huge}
+\titlespacing*{\chapter}{0pt}{-20pt}{30pt}
+
+% ---------- Литература ----------
+\usepackage[backend=biber,style=numeric,sorting=none]{biblatex}
+\addbibresource{references.bib}
+
+% ---------- Pandoc-сличне помоћне команде ----------
+\providecommand{\tightlist}{\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\providecommand{\passthrough}[1]{#1}
+
+% ---------- Цитати ----------
+\usepackage{csquotes}
+% Не активирамо \MakeOuterQuote јер коришћени тексти имају " унутар \textit{}
+% што доводи до конфликта аутоматске замене.
+
+% =====================================================================
+\title{\Huge \textbf{Пословна интелигенција}\\[0.5em]\Large Уџбеник}
+\author{Колектив аутора}
+\date{\today}
+
+\begin{document}
+
+% --- Насловна страна ---
+\begin{titlepage}
+  \centering
+  \vspace*{3cm}
+  {\Huge \textbf{Пословна интелигенција}}\\[1.2cm]
+  {\Large \textit{Уџбеник}}\\[2.5cm]
+  {\large Факултет организационих наука}\\[0.5cm]
+  {\large Универзитет у Београду}\\[3cm]
+  \vfill
+  {\large Београд, \the\year.}
+\end{titlepage}
+
+\frontmatter
+\tableofcontents
+\cleardoublepage
+
+\mainmatter
+
+\include{poglavlja/01-uvod}
+\include{poglavlja/02-skladista}
+\include{poglavlja/03-ozp}
+\include{poglavlja/04-automatizacija}
+
+\backmatter
+
+\end{document}

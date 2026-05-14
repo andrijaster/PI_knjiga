@@ -1,0 +1,71 @@
+<style>
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+</style>
+<h2 class="sr-only">Хороплет карта Европе са стопама инфекције по земљи, нормализованим на 100.000 становника, која показује градијент од нижих стопа на западу и северу ка вишим стопама на истоку.</h2>
+<div id="map" style="width: 100%;"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<script>
+(function(){
+const rates = {
+  'Germany':5,'France':8,'United Kingdom':8,'Netherlands':4,'Belgium':9,
+  'Switzerland':5,'Austria':6,'Ireland':6,'Luxembourg':5,
+  'Italy':7,'Spain':8,'Portugal':18,'Greece':5,
+  'Sweden':4,'Norway':4,'Finland':4,'Denmark':4,'Iceland':3,
+  'Poland':14,'Czechia':6,'Czech Republic':6,'Slovakia':7,'Hungary':12,
+  'Romania':60,'Bulgaria':25,
+  'Serbia':25,'Republic of Serbia':25,
+  'Croatia':10,'Slovenia':7,
+  'Bosnia and Herz.':35,'Bosnia and Herzegovina':35,
+  'Albania':18,'Montenegro':14,'Kosovo':18,
+  'Macedonia':12,'North Macedonia':12,
+  'Moldova':65,'Ukraine':75,'Belarus':30,
+  'Russia':55,'Russian Federation':55,
+  'Lithuania':35,'Latvia':30,'Estonia':12,
+  'Turkey':14,'Cyprus':5
+};
+const isDark = matchMedia('(prefers-color-scheme: dark)').matches;
+const ramp = ['#E6F1FB','#85B7EB','#378ADD','#185FA5','#042C53'];
+const colorScale = d3.scaleQuantize([0, 80], ramp);
+const W = 680, H = 480;
+const svg = d3.select('#map').append('svg').attr('viewBox', '0 0 ' + W + ' ' + H).attr('width', '100%');
+
+svg.append('text').attr('x', W/2).attr('y', 22).attr('text-anchor', 'middle')
+  .attr('font-size', 13).attr('font-weight', 500)
+  .attr('fill', 'var(--color-text-primary)')
+  .text('Стопа инфекције по региону (нормализовано на 100.000 становника)');
+
+const mapG = svg.append('g');
+
+const lY = 410, lX = 130, sW = 84, sH = 14;
+const ranges = ['0–16','16–32','32–48','48–64','64–80'];
+svg.append('text').attr('x', W/2).attr('y', lY - 8).attr('text-anchor', 'middle')
+  .attr('font-size', 11).attr('fill', 'var(--color-text-secondary)')
+  .text('Случајева на 100.000 становника годишње');
+ramp.forEach(function(c, i){
+  svg.append('rect').attr('x', lX + i * sW).attr('y', lY).attr('width', sW).attr('height', sH).attr('fill', c);
+  svg.append('text').attr('x', lX + i * sW + sW/2).attr('y', lY + sH + 14)
+    .attr('text-anchor', 'middle').attr('font-size', 11)
+    .attr('fill', 'var(--color-text-secondary)').text(ranges[i]);
+});
+svg.append('text').attr('x', W/2).attr('y', 465).attr('text-anchor', 'middle')
+  .attr('font-size', 11).attr('fill', 'var(--color-text-secondary)')
+  .text('Нормализација по становнику омогућава поређење региона различитих величина');
+
+d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(function(world){
+  const feats = topojson.feature(world, world.objects.countries).features;
+  const europeNames = new Set(Object.keys(rates));
+  const europeFC = { type:'FeatureCollection', features: feats.filter(function(d){ return europeNames.has(d.properties.name); }) };
+  const proj = d3.geoMercator().fitExtent([[40, 45], [640, 385]], europeFC);
+  const path = d3.geoPath(proj);
+  mapG.selectAll('path').data(feats).join('path')
+    .attr('d', path)
+    .attr('fill', function(d){
+      const r = rates[d.properties.name];
+      return r !== undefined ? colorScale(r) : (isDark ? '#2c2c2a' : '#e8e6df');
+    })
+    .attr('stroke', isDark ? 'rgba(255,255,255,0.2)' : '#ffffff')
+    .attr('stroke-width', 0.5);
+});
+})();
+</script>

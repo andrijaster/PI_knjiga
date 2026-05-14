@@ -1,0 +1,35 @@
+# LaTeX build artifacts
+*.aux
+*.log
+*.out
+*.toc
+*.bbl
+*.bcf
+*.blg
+*.run.xml
+*.fdb_latexmk
+*.fls
+*.synctex.gz
+*.lof
+*.lot
+*.idx
+*.ind
+*.ilg
+*.glo
+*.gls
+*.glg
+*.xdv
+
+# Per-chapter aux files
+poglavlja/*.aux
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+*.swp
+*~
+.vscode/
+.idea/
+scripts/__pycache__/
